@@ -11,21 +11,10 @@
             <span v-else> Inconnu </span>
          </p>
          <p>
-            <em>Posté le</em>
-            {{
-               new Date(post.created_at).toLocaleString("fr-FR", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-               })
-            }}
+            <em>Posté le </em>
+            {{ formatDate(post.created_at) }}
             <em> à </em>
-            {{
-               new Date(post.created_at).toLocaleString("fr-FR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-               })
-            }}
+            {{ formatTime(post.created_at) }}
          </p>
       </div>
 
@@ -46,20 +35,9 @@
                   </p>
                   <p>
                      <em>Posté le </em>
-                     {{
-                        new Date(post.created_at).toLocaleString("fr-FR", {
-                           year: "numeric",
-                           month: "2-digit",
-                           day: "2-digit",
-                        })
-                     }}
+                     {{ formatDate(comment.created_at) }}
                      <em> à </em>
-                     {{
-                        new Date(post.created_at).toLocaleString("fr-FR", {
-                           hour: "2-digit",
-                           minute: "2-digit",
-                        })
-                     }}
+                     {{ formatTime(comment.created_at) }}
                   </p>
                </div>
 
@@ -104,10 +82,29 @@ export default {
          }
       };
 
+      const formatDate = (dateString) => {
+         const options = {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+         };
+         return new Date(dateString).toLocaleDateString("fr-FR", options);
+      };
+
+      const formatTime = (dateString) => {
+         const options = {
+            hour: "2-digit",
+            minute: "2-digit",
+         };
+         return new Date(dateString).toLocaleTimeString("fr-FR", options);
+      };
+
       onMounted(fetchPost);
 
       return {
          post,
+         formatDate,
+         formatTime,
       };
    },
 };
