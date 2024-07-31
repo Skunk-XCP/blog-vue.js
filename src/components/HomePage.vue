@@ -17,21 +17,10 @@
                   <span v-else> Inconnu </span>
                </p>
                <p>
-                  <em>Posté le</em>
-                  {{
-                     new Date(post.created_at).toLocaleString("fr-FR", {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                     })
-                  }}
+                  <em>Posté le </em>
+                  {{ formatDate(post.created_at) }}
                   <em> à </em>
-                  {{
-                     new Date(post.created_at).toLocaleString("fr-FR", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                     })
-                  }}
+                  {{ formatTime(post.created_at) }}
                </p>
             </div>
             <p class="my-4">{{ post.content.substring(0, 100) }}...</p>
@@ -46,30 +35,44 @@
 </template>
 
 <script>
+import { fetchPosts } from "@/api/postService";
 import { onMounted, ref } from "vue";
-import { supabase } from "../supabase";
 
 export default {
    setup() {
       const posts = ref([]);
 
-      const fetchPosts = async () => {
-         let { data, error } = await supabase.from("posts").select(`
-          *,
-          user: user_id (id, firstname, lastname)
-        `);
-
-         if (error) {
-            console.error("Error fetching posts:", error);
-         } else {
-            posts.value = data;
+      const getPosts = async () => {
+         try {
+            posts.value = await fetchPosts();
+         } catch (error) {
+            console.error(error);
          }
       };
 
-      onMounted(fetchPosts);
+      const formatDate = (dateString) => {
+         const options = {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+         };
+         return new Date(dateString).toLocaleDateString("fr-FR", options);
+      };
+
+      const formatTime = (dateString) => {
+         const options = {
+            hour: "2-digit",
+            minute: "2-digit",
+         };
+         return new Date(dateString).toLocaleTimeString("fr-FR", options);
+      };
+
+      onMounted(getPosts);
 
       return {
          posts,
+         formatDate,
+         formatTime,
       };
    },
 };

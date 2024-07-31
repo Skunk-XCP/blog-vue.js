@@ -41,7 +41,7 @@
                   </p>
                </div>
 
-               <p class="my-4">{{ comment.content }}</p>
+               <p class="my-4 ml-1">{{ comment.content }}</p>
             </div>
          </li>
       </ul>
@@ -52,33 +52,20 @@
 </template>
 
 <script>
+import { fetchPostById } from "@/api/postService";
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
-import { supabase } from "../supabase";
 
 export default {
    setup() {
       const route = useRoute();
       const post = ref(null);
 
-      const fetchPost = async () => {
-         const { data, error } = await supabase
-            .from("posts")
-            .select(
-               `
-            *,
-            user: user_id (id, firstname, lastname),
-            comments(*, user: user_id (id, firstname, lastname))
-          `
-            )
-            .eq("id", route.params.id)
-            .single();
-
-         if (error) {
-            console.error("Error fetching post:", error);
-         } else {
-            console.log("Fetched post:", data);
-            post.value = data;
+      const getPosts = async () => {
+         try {
+            post.value = await fetchPostById(route.params.id);
+         } catch (error) {
+            console.error(error);
          }
       };
 
@@ -99,7 +86,7 @@ export default {
          return new Date(dateString).toLocaleTimeString("fr-FR", options);
       };
 
-      onMounted(fetchPost);
+      onMounted(getPosts);
 
       return {
          post,
