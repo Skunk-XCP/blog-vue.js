@@ -20,6 +20,10 @@
 
       <p class="my-4">{{ post.content }}</p>
 
+      <router-link :to="`/edit/${post.id}`" class="text-blue-500 underline"
+         >Edit</router-link
+      >
+
       <span class="block h-px bg-black mt-6"></span>
       <h3 class="font-bold text-2xl mt-4 mb-10">Commentaires</h3>
       <ul>
