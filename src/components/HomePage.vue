@@ -1,34 +1,52 @@
 <template>
-   <div class="p-20">
-      <h1 class="text-2xl font-bold mb-4">Home Page</h1>
+   <div class="p-10 ml-20">
       <div v-if="posts.length === 0">
          <p>Chargement des articles...</p>
       </div>
       <div v-else>
-         <div v-for="post in posts" :key="post.id" class="post">
-            <h2>{{ post.title }}</h2>
-            <p class="mb-20">{{ post.content.substring(0, 100) }}...</p>
+         <div v-for="post in posts" :key="post.id" class="mb-20">
+            <h2 class="text-3xl">
+               <strong>{{ post.title }}</strong>
+            </h2>
+            <div class="flex gap-4">
+               <p>
+                  <strong>Auteur: </strong>
+                  <span v-if="post.user">
+                     {{ post.user.firstname }} {{ post.user.lastname }}
+                  </span>
+                  <span v-else> Inconnu </span>
+               </p>
+               <p>
+                  <em>Posté le</em>
+                  {{
+                     new Date(post.created_at).toLocaleString("fr-FR", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                     })
+                  }}
+                  <em> à </em>
+                  {{
+                     new Date(post.created_at).toLocaleString("fr-FR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                     })
+                  }}
+               </p>
+            </div>
+            <p class="my-4">{{ post.content.substring(0, 100) }}...</p>
+
             <router-link :to="'/post/' + post.id" class="text-blue-500"
-               >Read more</router-link
+               >Lire l'article</router-link
             >
-            <p>
-               <strong>Auteur: </strong>
-               <span v-if="post.user">
-                  {{ post.user.firstname }} {{ post.user.lastname }}
-               </span>
-               <span v-else> Inconnu </span>
-            </p>
-            <p>
-               <em>Posté le:</em>
-               {{ new Date(post.created_at).toLocaleString() }}
-            </p>
+            <span class="block h-px bg-black mt-6"></span>
          </div>
       </div>
    </div>
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { supabase } from "../supabase";
 
 export default {
@@ -44,7 +62,6 @@ export default {
          if (error) {
             console.error("Error fetching posts:", error);
          } else {
-            console.log("Fetched posts:", data);
             posts.value = data;
          }
       };
