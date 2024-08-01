@@ -2,10 +2,20 @@ import { supabase } from "@/supabase";
 
 export const fetchPosts = async () => {
    const { data, error } = await supabase.from("posts").select(`
-    *,
-    user: user_id (id, firstname, lastname),
-    comments(*, user: user_id (id, firstname, lastname))
-  `);
+     *,
+     user: user_id (id, firstname, lastname),
+     comments(*, user: user_id (id, firstname, lastname))
+   `);
+   if (error) throw error;
+   return data;
+};
+
+export const fetchPostsByUserId = async (userId) => {
+   const { data, error } = await supabase
+      .from("posts")
+      .select("*")
+      .eq("user_id", userId);
+
    if (error) throw error;
    return data;
 };
