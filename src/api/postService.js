@@ -72,6 +72,17 @@ export const fetchPostById = async (id) => {
    return data;
 };
 
+export const createPost = async (post) => {
+   const { data, error } = await supabase.from("posts").insert([post]);
+
+   if (error) {
+      console.error("Erreur lors de la création de l'article :", error);
+      throw error;
+   }
+
+   return data;
+};
+
 export const updatePost = async (id, updates) => {
    const { data, error } = await supabase
       .from("posts")

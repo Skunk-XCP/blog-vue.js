@@ -1,3 +1,4 @@
+import CreatePost from "@/views/CreatePost.vue";
 import UserDashboard from "@/views/UserDashboard.vue";
 import UserLogin from "@/views/UserLogin.vue";
 import { createRouter, createWebHistory } from "vue-router";
@@ -11,6 +12,7 @@ const routes = [
    { path: "/edit/:id", component: EditPost },
    { path: "/dashboard", component: UserDashboard },
    { path: "/login", component: UserLogin },
+   { path: "/create", component: CreatePost },
 ];
 
 const router = createRouter({

@@ -8,7 +8,7 @@
          Créer un nouvel article
       </button>
       <div v-if="posts.length === 0">
-         <p>No posts available.</p>
+         <p>Aucun article disponible.</p>
       </div>
       <div v-else>
          <div v-for="post in posts" :key="post.id" class="mb-10">
@@ -37,7 +37,6 @@
 import { fetchPostsByUserId } from "@/api/postService";
 import { supabase } from "@/supabase";
 import { onMounted, ref } from "vue";
-// ajouter deletePost à l'import vue-router
 import { useRouter } from "vue-router";
 
 export default {
@@ -66,11 +65,16 @@ export default {
          router.push(`/edit/${postId}`);
       };
 
+      const createNewPost = () => {
+         router.push("/create");
+      };
+
       onMounted(fetchPosts);
 
       return {
          posts,
          editPost,
+         createNewPost,
       };
    },
 };

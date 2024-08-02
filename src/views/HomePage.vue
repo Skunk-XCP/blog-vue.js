@@ -23,7 +23,7 @@
                   {{ formatTime(post.created_at) }}
                </p>
             </div>
-            <p class="my-4">{{ post.content.substring(0, 100) }}...</p>
+            <div class="my-4" v-html="formatExcerpt(post.content)"></div>
 
             <router-link :to="'/post/' + post.id" class="text-blue-500"
                >Lire l'article</router-link
@@ -43,7 +43,6 @@ export default {
       const posts = ref([]);
       const loading = ref(true);
 
-      // Dans votre composant Vue (par exemple, la page d'accueil)
       const getPosts = async () => {
          try {
             posts.value = await fetchPosts();
@@ -53,6 +52,19 @@ export default {
                error
             );
          }
+      };
+
+      const formatExcerpt = (content) => {
+         const maxLength = 150;
+         let excerpt = content.substring(0, maxLength);
+         // Vérifier si le contenu original est plus long que l'extrait
+         if (content.length > maxLength) {
+            excerpt += "...";
+         }
+         return excerpt
+            .split("\n")
+            .map((line) => (line.trim() ? `<p>${line}</p>` : "<br>"))
+            .join("");
       };
 
       onMounted(() => {
@@ -83,6 +95,7 @@ export default {
          loading,
          formatDate,
          formatTime,
+         formatExcerpt,
       };
    },
 };

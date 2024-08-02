@@ -18,7 +18,8 @@
          </p>
       </div>
 
-      <p class="my-4">{{ post.content }}</p>
+      <!-- Utilisez v-html pour rendre le contenu -->
+      <div class="my-4 p-4 text-justify" v-html="formattedContent"></div>
 
       <span class="block h-px bg-black mt-6"></span>
 
@@ -69,7 +70,11 @@
                   </button>
                </div>
                <div v-else>
-                  <p class="my-4 ml-1">{{ comment.content }}</p>
+                  <!-- Utilisez v-html pour afficher les commentaires avec mise en forme -->
+                  <div
+                     class="my-4 ml-1"
+                     v-html="formatCommentContent(comment.content)"
+                  ></div>
                   <!-- Afficher le bouton "Editer" seulement si l'utilisateur connecté est l'auteur du commentaire -->
                   <button
                      v-if="canEditComment(comment)"
@@ -91,7 +96,7 @@
 <script>
 import { fetchPostById, updateComment } from "@/api/postService";
 import { supabase } from "@/supabase";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 
 export default {
@@ -111,16 +116,37 @@ export default {
             // Récupérer le post par ID
             post.value = await fetchPostById(route.params.id);
 
-            // Initialiser editContent pour chaque commentaire
-            post.value.comments.forEach((comment) => {
-               editContent.value[comment.id] = comment.content;
-            });
+            if (post.value && post.value.comments) {
+               // Initialiser editContent pour chaque commentaire
+               post.value.comments.forEach((comment) => {
+                  editContent.value[comment.id] = comment.content;
+               });
+            }
          } catch (error) {
             console.error(
                "Erreur lors de la récupération de l'article :",
                error
             );
          }
+      };
+
+      // Formatage du contenu avec les sauts de ligne
+      const formattedContent = computed(() => {
+         if (post.value && post.value.content) {
+            return post.value.content
+               .split("\n")
+               .map((line) => (line.trim() ? `<p>${line}</p>` : "<br>"))
+               .join("");
+         }
+         return "";
+      });
+
+      // Formatage du contenu du commentaire avec les sauts de ligne
+      const formatCommentContent = (content) => {
+         return content
+            .split("\n")
+            .map((line) => (line.trim() ? `<p>${line}</p>` : "<br>"))
+            .join("");
       };
 
       const canEditComment = (comment) => {
@@ -184,6 +210,8 @@ export default {
          canEditComment,
          formatDate,
          formatTime,
+         formattedContent,
+         formatCommentContent,
       };
    },
 };
