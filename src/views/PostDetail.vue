@@ -20,11 +20,8 @@
 
       <p class="my-4">{{ post.content }}</p>
 
-      <router-link :to="`/edit/${post.id}`" class="text-blue-500 underline"
-         >Edit</router-link
-      >
-
       <span class="block h-px bg-black mt-6"></span>
+
       <h3 class="font-bold text-2xl mt-4 mb-10">Commentaires</h3>
       <ul>
          <li v-for="comment in post.comments" :key="comment.id">
@@ -49,6 +46,14 @@
             </div>
          </li>
       </ul>
+
+      <router-link
+         v-if="canEdit"
+         :to="'/edit/' + post.id"
+         class="text-blue-500"
+      >
+         Edit
+      </router-link>
    </div>
    <div v-else class="p-20">
       <p>Chargement...</p>
@@ -57,6 +62,7 @@
 
 <script>
 import { fetchPostById } from "@/api/postService";
+import { supabase } from "@/supabase";
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 
@@ -64,12 +70,25 @@ export default {
    setup() {
       const route = useRoute();
       const post = ref(null);
+      const user = ref(null);
+      const canEdit = ref(false);
 
-      const getPosts = async () => {
+      const getPost = async () => {
          try {
+            const { data } = await supabase.auth.getUser();
+            user.value = data.user;
+
             post.value = await fetchPostById(route.params.id);
+
+            // Vérifier si l'utilisateur peut éditer le post
+            if (user.value && post.value.user.auth_id === user.value.id) {
+               canEdit.value = true;
+            }
          } catch (error) {
-            console.error(error);
+            console.error(
+               "Erreur lors de la récupération de l'article :",
+               error
+            );
          }
       };
 
@@ -90,10 +109,11 @@ export default {
          return new Date(dateString).toLocaleTimeString("fr-FR", options);
       };
 
-      onMounted(getPosts);
+      onMounted(getPost);
 
       return {
          post,
+         canEdit,
          formatDate,
          formatTime,
       };

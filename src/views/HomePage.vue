@@ -41,12 +41,19 @@ import { onMounted, ref } from "vue";
 export default {
    setup() {
       const posts = ref([]);
+      const loading = ref(true);
 
       const getPosts = async () => {
          try {
             posts.value = await fetchPosts();
+            console.log("Articles récupérés :", posts.value); //console.log
          } catch (error) {
-            console.error(error);
+            console.error(
+               "Erreur lors de la récupération des articles :",
+               error
+            );
+         } finally {
+            loading.value = false;
          }
       };
 
@@ -71,6 +78,7 @@ export default {
 
       return {
          posts,
+         loading,
          formatDate,
          formatTime,
       };
