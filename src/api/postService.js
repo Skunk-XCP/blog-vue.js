@@ -1,11 +1,16 @@
 import { supabase } from "@/supabase";
 
 export const fetchPosts = async () => {
-   const { data, error } = await supabase.from("posts").select(`
+   const { data, error } = await supabase
+      .from("posts")
+      .select(
+         `
      *,
      user: user_id (auth_id, firstname, lastname),
      comments (id, content, user: user_id (firstname, lastname))
-   `);
+   `
+      )
+      .order("created_at", { ascending: false });
 
    if (error) {
       console.error("Erreur lors de la récupération des articles :", error);
@@ -53,6 +58,7 @@ export const fetchPostById = async (id) => {
      `
       )
       .eq("id", id)
+      .order("created_at", { ascending: true })
       .single();
 
    if (error) {
