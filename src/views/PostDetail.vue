@@ -25,7 +25,15 @@
       <h3 class="font-bold text-2xl mt-4 mb-10">Commentaires</h3>
       <ul>
          <li v-for="comment in post.comments" :key="comment.id">
-            <div class="border p-2 mb-3">
+            <div
+               class="border p-2 mb-3"
+               :style="{
+                  boxShadow: editMode[comment.id]
+                     ? '0 0 10px rgba(0,0,0,0.3)'
+                     : 'none',
+                  transform: editMode[comment.id] ? 'scale(1.02)' : 'scale(1)',
+               }"
+            >
                <div class="flex gap-4 border p-2">
                   <p>
                      <strong>Auteur: </strong>
@@ -42,18 +50,38 @@
                   </p>
                </div>
 
-               <p class="my-4 ml-1">{{ comment.content }}</p>
+               <div v-if="editMode[comment.id]">
+                  <textarea
+                     v-model="editContent[comment.id]"
+                     class="w-full border p-2"
+                  ></textarea>
+                  <button
+                     @click="saveEdit(comment.id)"
+                     class="bg-green-500 text-white p-2 rounded mt-2 mr-2"
+                  >
+                     Valider
+                  </button>
+                  <button
+                     @click="cancelEdit(comment.id)"
+                     class="bg-gray-500 text-white p-2 rounded mt-2"
+                  >
+                     Annuler
+                  </button>
+               </div>
+               <div v-else>
+                  <p class="my-4 ml-1">{{ comment.content }}</p>
+                  <!-- Afficher le bouton "Editer" seulement si l'utilisateur connecté est l'auteur du commentaire -->
+                  <button
+                     v-if="canEditComment(comment)"
+                     @click="enableEdit(comment.id, comment.content)"
+                     class="text-blue-500"
+                  >
+                     Editer
+                  </button>
+               </div>
             </div>
          </li>
       </ul>
-
-      <router-link
-         v-if="canEdit"
-         :to="'/edit/' + post.id"
-         class="text-blue-500"
-      >
-         Edit
-      </router-link>
    </div>
    <div v-else class="p-20">
       <p>Chargement...</p>
@@ -61,7 +89,7 @@
 </template>
 
 <script>
-import { fetchPostById } from "@/api/postService";
+import { fetchPostById, updateComment } from "@/api/postService";
 import { supabase } from "@/supabase";
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
@@ -71,22 +99,57 @@ export default {
       const route = useRoute();
       const post = ref(null);
       const user = ref(null);
-      const canEdit = ref(false);
+      const editMode = ref({});
+      const editContent = ref({});
 
       const getPost = async () => {
          try {
+            // Récupérer les informations de l'utilisateur actuellement connecté
             const { data } = await supabase.auth.getUser();
             user.value = data.user;
 
+            // Récupérer le post par ID
             post.value = await fetchPostById(route.params.id);
 
-            // Vérifier si l'utilisateur peut éditer le post
-            if (user.value && post.value.user.auth_id === user.value.id) {
-               canEdit.value = true;
-            }
+            // Initialiser editContent pour chaque commentaire
+            post.value.comments.forEach((comment) => {
+               editContent.value[comment.id] = comment.content;
+            });
          } catch (error) {
             console.error(
                "Erreur lors de la récupération de l'article :",
+               error
+            );
+         }
+      };
+
+      const canEditComment = (comment) => {
+         // Vérifier si l'utilisateur peut éditer le commentaire
+         return user.value && comment.user.auth_id === user.value.id;
+      };
+
+      const enableEdit = (commentId, content) => {
+         editMode.value = { ...editMode.value, [commentId]: true };
+         editContent.value = { ...editContent.value, [commentId]: content };
+      };
+
+      const cancelEdit = (commentId) => {
+         editMode.value = { ...editMode.value, [commentId]: false };
+      };
+
+      const saveEdit = async (commentId) => {
+         try {
+            await updateComment(commentId, {
+               content: editContent.value[commentId],
+            });
+            const updatedComment = post.value.comments.find(
+               (comment) => comment.id === commentId
+            );
+            updatedComment.content = editContent.value[commentId];
+            cancelEdit(commentId);
+         } catch (error) {
+            console.error(
+               "Erreur lors de la mise à jour du commentaire :",
                error
             );
          }
@@ -113,7 +176,12 @@ export default {
 
       return {
          post,
-         canEdit,
+         editMode,
+         editContent,
+         enableEdit,
+         cancelEdit,
+         saveEdit,
+         canEditComment,
          formatDate,
          formatTime,
       };

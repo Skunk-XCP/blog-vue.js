@@ -12,7 +12,6 @@ export const fetchPosts = async () => {
       throw error;
    }
 
-   console.log("Données récupérées :", data); // Ajoutez cette ligne pour voir les données récupérées
    return data;
 };
 
@@ -45,7 +44,12 @@ export const fetchPostById = async (id) => {
          `
        *,
        user: user_id (auth_id, firstname, lastname),
-       comments (id, content, user: user_id (firstname, lastname))
+       comments (
+         id,
+         content,
+         created_at,
+         user: user_id (auth_id, firstname, lastname)
+       )
      `
       )
       .eq("id", id)
@@ -66,10 +70,25 @@ export const updatePost = async (id, updates) => {
    const { data, error } = await supabase
       .from("posts")
       .update(updates)
-      .eq("id", id);
+      .eq("id", id)
+      .select();
 
    if (error) {
       console.error("Erreur lors de la mise à jour de l'article :", error);
+      throw error;
+   }
+
+   return data;
+};
+
+export const updateComment = async (commentId, updates) => {
+   const { data, error } = await supabase
+      .from("comments")
+      .update(updates)
+      .eq("id", commentId)
+      .select();
+
+   if (error) {
       throw error;
    }
 

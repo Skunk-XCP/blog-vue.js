@@ -43,19 +43,21 @@ export default {
       const posts = ref([]);
       const loading = ref(true);
 
+      // Dans votre composant Vue (par exemple, la page d'accueil)
       const getPosts = async () => {
          try {
             posts.value = await fetchPosts();
-            console.log("Articles récupérés :", posts.value); //console.log
          } catch (error) {
             console.error(
                "Erreur lors de la récupération des articles :",
                error
             );
-         } finally {
-            loading.value = false;
          }
       };
+
+      onMounted(() => {
+         getPosts();
+      });
 
       const formatDate = (dateString) => {
          const options = {

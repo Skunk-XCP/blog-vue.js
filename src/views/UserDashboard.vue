@@ -52,9 +52,7 @@ export default {
                data: { user },
             } = await supabase.auth.getUser();
             if (user) {
-               console.log("Utilisateur connecté :", user);
                posts.value = await fetchPostsByUserId(user.id);
-               console.log("Articles récupérés :", posts.value);
             } else {
                router.push("/login");
             }

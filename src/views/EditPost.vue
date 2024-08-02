@@ -64,7 +64,6 @@ export default {
                title: post.value.title,
                content: post.value.content,
             };
-            console.log("Fetched post:", post.value);
          } catch (err) {
             error.value = "Error fetching post.";
             console.error("Error fetching post:", err);
@@ -73,7 +72,6 @@ export default {
 
       const handleSubmit = async () => {
          try {
-            console.log("Updating post:", localPost.value);
             const updates = {
                title: localPost.value.title,
                content: localPost.value.content,
