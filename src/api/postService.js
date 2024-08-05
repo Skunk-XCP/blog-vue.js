@@ -111,3 +111,18 @@ export const updateComment = async (commentId, updates) => {
 
    return data;
 };
+
+export const deletePost = async (postId) => {
+   const { data, error } = await supabase
+      .from("posts")
+      .delete()
+      .eq("id", postId)
+      .select();
+
+   if (error) {
+      console.error("Erreur lors de la suppression de l'article :", error);
+      throw error;
+   }
+
+   return data;
+};

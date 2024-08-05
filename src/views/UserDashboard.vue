@@ -22,7 +22,7 @@
                   Modifier
                </button>
                <button
-                  @click="deletePost(post.id)"
+                  @click="showDeleteConfirmation(post.id)"
                   class="bg-red-500 text-white px-4 py-2 rounded"
                >
                   Supprimer
@@ -30,20 +30,33 @@
             </div>
          </div>
       </div>
+      <AppModal
+         v-if="isModalVisible"
+         :isVisible="isModalVisible"
+         message="Êtes-vous sûr de vouloir supprimer cet article ?"
+         @confirm="confirmDelete"
+         @cancel="cancelDelete"
+      />
    </div>
 </template>
 
 <script>
-import { fetchPostsByUserId } from "@/api/postService";
+import { deletePost, fetchPostsByUserId } from "@/api/postService";
+import AppModal from "@/components/AppModal.vue";
 import { supabase } from "@/supabase";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 export default {
+   components: {
+      AppModal,
+   },
    setup() {
       const posts = ref([]);
       const error = ref(null);
       const router = useRouter();
+      const isModalVisible = ref(false);
+      const postIdToDelete = ref(null);
 
       const fetchPosts = async () => {
          try {
@@ -69,12 +82,39 @@ export default {
          router.push("/create");
       };
 
+      const showDeleteConfirmation = (postId) => {
+         postIdToDelete.value = postId;
+         isModalVisible.value = true;
+      };
+
+      const confirmDelete = async () => {
+         try {
+            await deletePost(postIdToDelete.value);
+            posts.value = posts.value.filter(
+               (post) => post.id !== postIdToDelete.value
+            );
+            isModalVisible.value = false;
+            postIdToDelete.value = null;
+         } catch (err) {
+            console.error("Erreur lors de la suppression de l'article :", err);
+         }
+      };
+
+      const cancelDelete = () => {
+         isModalVisible.value = false;
+         postIdToDelete.value = null;
+      };
+
       onMounted(fetchPosts);
 
       return {
          posts,
          editPost,
          createNewPost,
+         showDeleteConfirmation,
+         confirmDelete,
+         cancelDelete,
+         isModalVisible,
       };
    },
 };
