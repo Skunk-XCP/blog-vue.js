@@ -124,8 +124,13 @@ export default {
          return DOMPurify.sanitize(
             post.value.content
                .split("\n\n")
-               .map((paragraph) => `<p>${paragraph}</p>`)
-               .join("")
+               .map((paragraph) =>
+                  paragraph
+                     .split("\n")
+                     .map((line) => (line.trim() ? `<p>${line}</p>` : "<br>"))
+                     .join("")
+               )
+               .join("<br>")
          );
       });
 
@@ -133,8 +138,13 @@ export default {
          return DOMPurify.sanitize(
             content
                .split("\n\n")
-               .map((paragraph) => `<p>${paragraph}</p>`)
-               .join("")
+               .map((paragraph) =>
+                  paragraph
+                     .split("\n")
+                     .map((line) => (line.trim() ? `<p>${line}</p>` : "<br>"))
+                     .join("")
+               )
+               .join("<br>")
          );
       };
 
