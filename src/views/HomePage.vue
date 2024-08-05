@@ -67,10 +67,6 @@ export default {
             .join("");
       };
 
-      onMounted(() => {
-         getPosts();
-      });
-
       const formatDate = (dateString) => {
          const options = {
             year: "numeric",

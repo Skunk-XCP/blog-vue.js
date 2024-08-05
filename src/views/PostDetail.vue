@@ -1,13 +1,12 @@
 <template>
    <div class="p-10 ml-20" v-if="post">
       <h1 class="text-3xl font-bold mb-4">{{ post.title }}</h1>
-
       <div class="flex gap-4">
          <p>
             <strong>Auteur: </strong>
-            <span v-if="post.user">
-               {{ post.user.firstname }} {{ post.user.lastname }}
-            </span>
+            <span v-if="post.user"
+               >{{ post.user.firstname }} {{ post.user.lastname }}</span
+            >
             <span v-else> Inconnu </span>
          </p>
          <p>
@@ -17,12 +16,8 @@
             {{ formatTime(post.created_at) }}
          </p>
       </div>
-
-      <!-- Utilisez v-html pour rendre le contenu -->
-      <div class="my-4 p-4 text-justify" v-html="formattedContent"></div>
-
+      <div class="my-4 p-4 text-justify" v-html="sanitizedContent"></div>
       <span class="block h-px bg-black mt-6"></span>
-
       <h3 class="font-bold text-2xl mt-4 mb-10">Commentaires</h3>
       <ul>
          <li v-for="comment in post.comments" :key="comment.id">
@@ -38,9 +33,10 @@
                <div class="flex gap-4 border p-2">
                   <p>
                      <strong>Auteur: </strong>
-                     <span v-if="comment.user">
-                        {{ comment.user.firstname }} {{ comment.user.lastname }}
-                     </span>
+                     <span v-if="comment.user"
+                        >{{ comment.user.firstname }}
+                        {{ comment.user.lastname }}</span
+                     >
                      <span v-else> Inconnu </span>
                   </p>
                   <p>
@@ -50,7 +46,6 @@
                      {{ formatTime(comment.created_at) }}
                   </p>
                </div>
-
                <div v-if="editMode[comment.id]">
                   <textarea
                      v-model="editContent[comment.id]"
@@ -70,12 +65,10 @@
                   </button>
                </div>
                <div v-else>
-                  <!-- Utilisez v-html pour afficher les commentaires avec mise en forme -->
                   <div
                      class="my-4 ml-1"
                      v-html="formatCommentContent(comment.content)"
                   ></div>
-                  <!-- Afficher le bouton "Editer" seulement si l'utilisateur connecté est l'auteur du commentaire -->
                   <button
                      v-if="canEditComment(comment)"
                      @click="enableEdit(comment.id, comment.content)"
@@ -96,6 +89,7 @@
 <script>
 import { fetchPostById, updateComment } from "@/api/postService";
 import { supabase } from "@/supabase";
+import DOMPurify from "dompurify";
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 
@@ -109,15 +103,10 @@ export default {
 
       const getPost = async () => {
          try {
-            // Récupérer les informations de l'utilisateur actuellement connecté
             const { data } = await supabase.auth.getUser();
             user.value = data.user;
-
-            // Récupérer le post par ID
             post.value = await fetchPostById(route.params.id);
-
             if (post.value && post.value.comments) {
-               // Initialiser editContent pour chaque commentaire
                post.value.comments.forEach((comment) => {
                   editContent.value[comment.id] = comment.content;
                });
@@ -130,27 +119,26 @@ export default {
          }
       };
 
-      // Formatage du contenu avec les sauts de ligne
-      const formattedContent = computed(() => {
-         if (post.value && post.value.content) {
-            return post.value.content
-               .split("\n")
-               .map((line) => (line.trim() ? `<p>${line}</p>` : "<br>"))
-               .join("");
-         }
-         return "";
+      const sanitizedContent = computed(() => {
+         if (!post.value) return "";
+         return DOMPurify.sanitize(
+            post.value.content
+               .split("\n\n")
+               .map((paragraph) => `<p>${paragraph}</p>`)
+               .join("")
+         );
       });
 
-      // Formatage du contenu du commentaire avec les sauts de ligne
       const formatCommentContent = (content) => {
-         return content
-            .split("\n")
-            .map((line) => (line.trim() ? `<p>${line}</p>` : "<br>"))
-            .join("");
+         return DOMPurify.sanitize(
+            content
+               .split("\n\n")
+               .map((paragraph) => `<p>${paragraph}</p>`)
+               .join("")
+         );
       };
 
       const canEditComment = (comment) => {
-         // Vérifier si l'utilisateur peut éditer le commentaire
          return user.value && comment.user.auth_id === user.value.id;
       };
 
@@ -182,19 +170,12 @@ export default {
       };
 
       const formatDate = (dateString) => {
-         const options = {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-         };
+         const options = { year: "numeric", month: "2-digit", day: "2-digit" };
          return new Date(dateString).toLocaleDateString("fr-FR", options);
       };
 
       const formatTime = (dateString) => {
-         const options = {
-            hour: "2-digit",
-            minute: "2-digit",
-         };
+         const options = { hour: "2-digit", minute: "2-digit" };
          return new Date(dateString).toLocaleTimeString("fr-FR", options);
       };
 
@@ -210,7 +191,7 @@ export default {
          canEditComment,
          formatDate,
          formatTime,
-         formattedContent,
+         sanitizedContent,
          formatCommentContent,
       };
    },
