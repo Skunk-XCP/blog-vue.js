@@ -157,3 +157,17 @@ export const addComment = async ({ content, postId, userId }) => {
       throw error;
    }
 };
+
+export const deleteComment = async (commentId) => {
+   const { data, error } = await supabase
+      .from("comments")
+      .delete()
+      .eq("id", commentId);
+
+   if (error) {
+      console.error("Erreur lors de la suppression du commentaire :", error);
+      throw error;
+   }
+
+   return data;
+};

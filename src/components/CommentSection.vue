@@ -10,9 +10,11 @@
             class="w-full border p-2"
             placeholder="Écrire un commentaire..."
          ></textarea>
-         <p v-else class="text-gray-500 italic">
+         <p v-else class="text-gray-300 italic border p-2">
             Connectez-vous pour commenter
          </p>
+         <!-- Afficher le message d'erreur -->
+         <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
          <button
             v-if="user"
             @click="submitComment"
@@ -34,19 +36,58 @@
                   transform: editMode[comment.id] ? 'scale(1.02)' : 'scale(1)',
                }"
             >
-               <div class="flex gap-4 border p-2">
-                  <p>
-                     <strong>Auteur: </strong>
-                     <span v-if="comment.user">
-                        {{ comment.user.firstname }} {{ comment.user.lastname }}
-                     </span>
-                     <span v-else> Inconnu </span>
-                  </p>
-                  <p>
-                     <em>Posté le </em> {{ formatDate(comment.created_at) }}
-                     <em> à </em> {{ formatTime(comment.created_at) }}
-                  </p>
+               <div class="flex justify-between border p-2">
+                  <div class="flex gap-4">
+                     <p>
+                        <strong>Auteur: </strong>
+                        <span v-if="comment.user">
+                           {{ comment.user.firstname }}
+                           {{ comment.user.lastname }}
+                        </span>
+                        <span v-else> Inconnu </span>
+                     </p>
+                     <p>
+                        <em>Posté le </em> {{ formatDate(comment.created_at) }}
+                        <em> à </em> {{ formatTime(comment.created_at) }}
+                     </p>
+                  </div>
+                  <div class="flex gap-4">
+                     <template v-if="!confirmDelete[comment.id]">
+                        <button
+                           v-if="canEditComment(comment)"
+                           @click="enableEdit(comment.id, comment.content)"
+                           class="text-blue-500"
+                        >
+                           Editer
+                        </button>
+                        <button
+                           v-if="canEditComment(comment)"
+                           @click="confirmDelete[comment.id] = true"
+                           class="text-red-500"
+                        >
+                           Supprimer
+                        </button>
+                     </template>
+                     <template v-else>
+                        <span class="font-semibold"
+                           >Supprimer le commentaire ?</span
+                        >
+                        <button
+                           @click="deleteComment(comment.id)"
+                           class="font-semibold"
+                        >
+                           Oui
+                        </button>
+                        <button
+                           @click="cancelDelete(comment.id)"
+                           class="font-semibold"
+                        >
+                           Non
+                        </button>
+                     </template>
+                  </div>
                </div>
+
                <div v-if="editMode[comment.id]">
                   <textarea
                      v-model="editContent[comment.id]"
@@ -70,13 +111,6 @@
                      class="my-4 ml-1"
                      v-html="formatCommentContent(comment.content)"
                   ></div>
-                  <button
-                     v-if="canEditComment(comment)"
-                     @click="enableEdit(comment.id, comment.content)"
-                     class="text-blue-500"
-                  >
-                     Editer
-                  </button>
                </div>
             </div>
          </li>
@@ -85,7 +119,11 @@
 </template>
 
 <script>
-import { addComment, updateComment } from "@/api/postService";
+import {
+   addComment,
+   deleteComment as apiDeleteComment,
+   updateComment,
+} from "@/api/postService";
 import DOMPurify from "dompurify";
 import { ref, watch } from "vue";
 
@@ -109,11 +147,13 @@ export default {
       const editMode = ref({});
       const editContent = ref({});
       const newCommentContent = ref("");
+      const errorMessage = ref("");
+      const confirmDelete = ref({});
 
       watch(
          () => props.comments,
          (newComments) => {
-            localComments.value = [...newComments];
+            localComments.value = newComments ? [...newComments] : [];
          }
       );
 
@@ -165,9 +205,36 @@ export default {
          }
       };
 
+      const deleteComment = async (commentId) => {
+         try {
+            await apiDeleteComment(commentId);
+            localComments.value = localComments.value.filter(
+               (comment) => comment.id !== commentId
+            );
+            confirmDelete.value = {
+               ...confirmDelete.value,
+               [commentId]: false,
+            };
+         } catch (error) {
+            console.error(
+               "Erreur lors de la suppression du commentaire :",
+               error
+            );
+            errorMessage.value = `Erreur lors de la suppression du commentaire : ${
+               error.message || error
+            }`;
+         }
+      };
+
+      const cancelDelete = (commentId) => {
+         confirmDelete.value = { ...confirmDelete.value, [commentId]: false };
+      };
+
       const submitComment = async () => {
+         errorMessage.value = "";
+
          if (!newCommentContent.value.trim()) {
-            alert("Le commentaire ne peut pas être vide.");
+            errorMessage.value = "Le commentaire ne peut pas être vide.";
             return;
          }
 
@@ -177,17 +244,13 @@ export default {
                postId: props.postId,
                userId: props.user.id,
             });
-            console.log("Post ID reçu par le composant :", props.postId); // Debug
-
             localComments.value.push(newComment);
             newCommentContent.value = "";
          } catch (error) {
             console.error("Erreur lors de l'ajout du commentaire :", error);
-            alert(
-               `Erreur lors de l'ajout du commentaire : ${
-                  error.message || error
-               }`
-            );
+            errorMessage.value = `Erreur lors de l'ajout du commentaire : ${
+               error.message || error
+            }`;
          }
       };
 
@@ -208,12 +271,16 @@ export default {
          enableEdit,
          cancelEdit,
          saveEdit,
+         deleteComment,
+         cancelDelete,
          canEditComment,
          formatCommentContent,
          formatDate,
          formatTime,
          newCommentContent,
          submitComment,
+         errorMessage,
+         confirmDelete,
       };
    },
 };
