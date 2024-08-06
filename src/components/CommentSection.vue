@@ -1,8 +1,30 @@
 <template>
    <div>
       <h3 class="font-bold text-2xl mt-4 mb-10">Commentaires</h3>
+
+      <!-- Ajout de commentaire -->
+      <div class="mb-4">
+         <textarea
+            v-if="user"
+            v-model="newCommentContent"
+            class="w-full border p-2"
+            placeholder="Écrire un commentaire..."
+         ></textarea>
+         <p v-else class="text-gray-500 italic">
+            Connectez-vous pour commenter
+         </p>
+         <button
+            v-if="user"
+            @click="submitComment"
+            class="bg-blue-500 text-white p-2 rounded mt-2"
+         >
+            Publier
+         </button>
+      </div>
+
+      <!-- Liste des commentaires -->
       <ul>
-         <li v-for="comment in comments" :key="comment.id">
+         <li v-for="comment in localComments" :key="comment.id">
             <div
                class="border p-2 mb-3"
                :style="{
@@ -63,9 +85,9 @@
 </template>
 
 <script>
-import { updateComment } from "@/api/postService";
+import { addComment, updateComment } from "@/api/postService";
 import DOMPurify from "dompurify";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
 export default {
    props: {
@@ -77,10 +99,23 @@ export default {
          type: Object,
          required: true,
       },
+      postId: {
+         type: String,
+         required: true,
+      },
    },
    setup(props) {
+      const localComments = ref([...props.comments]);
       const editMode = ref({});
       const editContent = ref({});
+      const newCommentContent = ref("");
+
+      watch(
+         () => props.comments,
+         (newComments) => {
+            localComments.value = [...newComments];
+         }
+      );
 
       const formatCommentContent = (content) => {
          return DOMPurify.sanitize(
@@ -97,7 +132,10 @@ export default {
       };
 
       const canEditComment = (comment) => {
-         return props.user && comment.user.auth_id === props.user.id;
+         if (!props.user || !comment.user) {
+            return false;
+         }
+         return comment.user.auth_id === props.user.id;
       };
 
       const enableEdit = (commentId, content) => {
@@ -114,7 +152,7 @@ export default {
             await updateComment(commentId, {
                content: editContent.value[commentId],
             });
-            const updatedComment = props.comments.find(
+            const updatedComment = localComments.value.find(
                (comment) => comment.id === commentId
             );
             updatedComment.content = editContent.value[commentId];
@@ -123,6 +161,32 @@ export default {
             console.error(
                "Erreur lors de la mise à jour du commentaire :",
                error
+            );
+         }
+      };
+
+      const submitComment = async () => {
+         if (!newCommentContent.value.trim()) {
+            alert("Le commentaire ne peut pas être vide.");
+            return;
+         }
+
+         try {
+            const newComment = await addComment({
+               content: newCommentContent.value,
+               postId: props.postId,
+               userId: props.user.id,
+            });
+            console.log("Post ID reçu par le composant :", props.postId); // Debug
+
+            localComments.value.push(newComment);
+            newCommentContent.value = "";
+         } catch (error) {
+            console.error("Erreur lors de l'ajout du commentaire :", error);
+            alert(
+               `Erreur lors de l'ajout du commentaire : ${
+                  error.message || error
+               }`
             );
          }
       };
@@ -138,6 +202,7 @@ export default {
       };
 
       return {
+         localComments,
          editMode,
          editContent,
          enableEdit,
@@ -147,6 +212,8 @@ export default {
          formatCommentContent,
          formatDate,
          formatTime,
+         newCommentContent,
+         submitComment,
       };
    },
 };

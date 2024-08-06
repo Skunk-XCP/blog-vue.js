@@ -18,7 +18,11 @@
       <span class="block h-px bg-black mt-6"></span>
 
       <!-- Comment Section -->
-      <CommentSection :comments="post.comments" :user="user" />
+      <CommentSection
+         :comments="post.comments"
+         :user="user"
+         :postId="post.id"
+      />
    </div>
    <div v-else class="p-20">
       <p>Chargement...</p>

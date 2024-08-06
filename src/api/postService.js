@@ -126,3 +126,34 @@ export const deletePost = async (postId) => {
 
    return data;
 };
+
+export const addComment = async ({ content, postId, userId }) => {
+   console.log("Tentative d'ajout d'un commentaire :", {
+      content,
+      postId,
+      userId,
+   });
+
+   try {
+      const { data, error } = await supabase
+         .from("comments")
+         .insert([{ content, post_id: postId, user_id: userId }])
+         .select();
+
+      if (error) {
+         console.error("Erreur lors de l'insertion du commentaire :", error);
+         throw error;
+      }
+
+      console.log("Données insérées :", data);
+
+      if (!data || data.length === 0) {
+         throw new Error("Aucune donnée retournée après l'insertion.");
+      }
+
+      return data[0];
+   } catch (error) {
+      console.error("Erreur lors de l'ajout du commentaire :", error);
+      throw error;
+   }
+};
