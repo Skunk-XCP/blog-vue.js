@@ -22,11 +22,19 @@
                class="border p-2 w-full h-40"
             ></textarea>
          </div>
-         <button type="submit" class="bg-blue-500 text-white p-2 rounded">
-            Update Post
-         </button>
+         <div class="flex space-x-4">
+            <button type="submit" class="bg-blue-500 text-white p-2 rounded">
+               Update Post
+            </button>
+            <button
+               type="button"
+               @click="cancelEdit"
+               class="bg-gray-500 text-white p-2 rounded"
+            >
+               Annuler
+            </button>
+         </div>
       </form>
-
       <div v-else>
          <p>Loading post...</p>
       </div>
@@ -89,6 +97,10 @@ export default {
          }
       };
 
+      const cancelEdit = () => {
+         router.push("/dashboard");
+      };
+
       onMounted(fetchPost);
 
       return {
@@ -97,6 +109,7 @@ export default {
          message,
          error,
          handleSubmit,
+         cancelEdit,
       };
    },
 };

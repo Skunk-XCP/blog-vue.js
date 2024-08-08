@@ -1,4 +1,5 @@
 import CreatePost from "@/views/CreatePost.vue";
+import PreviewPost from "@/views/PreviewPost.vue";
 import UserDashboard from "@/views/UserDashboard.vue";
 import UserLogin from "@/views/UserLogin.vue";
 import { createRouter, createWebHistory } from "vue-router";
@@ -13,6 +14,7 @@ const routes = [
    { path: "/dashboard", component: UserDashboard },
    { path: "/login", component: UserLogin },
    { path: "/create", component: CreatePost },
+   { path: "/preview/:id", component: PreviewPost },
 ];
 
 const router = createRouter({
