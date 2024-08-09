@@ -10,6 +10,7 @@
    "dependencies": {
       "@supabase/realtime-js": "^2.10.4",
       "@supabase/supabase-js": "^2.45.0",
+      "bcryptjs": "^2.4.3",
       "core-js": "^3.8.3",
       "dompurify": "^3.1.6",
       "dotenv": "^16.4.5",

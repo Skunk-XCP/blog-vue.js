@@ -6,15 +6,25 @@
             <li>
                <router-link to="/" class="hover:underline">Home</router-link>
             </li>
-            <li>
+            <li v-if="isLoggedIn">
                <router-link to="/dashboard" class="hover:underline"
                   >Dashboard</router-link
                >
             </li>
+            <li v-else>
+               <router-link to="/signin" class="hover:underline"
+                  >Sign In</router-link
+               >
+            </li>
             <li v-if="isLoggedIn">
                <button @click="handleLogout" class="hover:underline">
-                  Logout
+                  Log Out
                </button>
+            </li>
+            <li v-else>
+               <router-link to="/login" class="hover:underline"
+                  >Log In</router-link
+               >
             </li>
          </ul>
       </nav>
