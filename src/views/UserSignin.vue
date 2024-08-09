@@ -106,8 +106,6 @@ export default {
                }
             );
 
-            console.log("SignUp response:", data);
-
             if (signUpError) {
                if (signUpError.message.includes("Email rate limit exceeded")) {
                   error.value =
@@ -119,7 +117,6 @@ export default {
             }
 
             const user = data.user;
-            console.log("User signed up:", user);
 
             if (!user) {
                throw new Error("User is null after signUp.");
@@ -139,17 +136,13 @@ export default {
                   },
                ]);
 
-            if (profileError) {
-               console.error("Profile Error:", profileError);
-               throw profileError;
-            }
+            if (profileError) throw profileError;
 
             message.value = "Sign up successful! Redirecting to login...";
             setTimeout(() => {
                router.push("/login");
             }, 2000);
          } catch (err) {
-            console.error("SignUp Flow Error:", err);
             if (!error.value) {
                error.value = `Error signing up: ${err.message}`;
             }

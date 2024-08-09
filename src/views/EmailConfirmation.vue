@@ -25,14 +25,12 @@ export default {
             if (getSessionError || !session) {
                error.value =
                   "Erreur lors de la récupération de la session utilisateur.";
-               console.error("Error getting session:", getSessionError);
                loading.value = false;
                return;
             }
 
             const user = session.user;
 
-            // Vérifiez si l'utilisateur existe dans la table `users`
             const { data, error: profileError } = await supabase
                .from("users")
                .select("*")
@@ -40,9 +38,6 @@ export default {
                .single();
 
             if (profileError) {
-               console.error("User profile not found:", profileError);
-
-               // Insérez le profil utilisateur si non trouvé
                const { error: insertError } = await supabase
                   .from("users")
                   .insert([
@@ -54,7 +49,6 @@ export default {
                   ]);
 
                if (insertError) {
-                  console.error("Error inserting user profile:", insertError);
                   error.value =
                      "Erreur lors de la création du profil utilisateur.";
                } else {
@@ -66,7 +60,6 @@ export default {
 
             loading.value = false;
          } catch (err) {
-            console.error("Erreur lors de la confirmation de l'email :", err);
             error.value = "Erreur lors de la confirmation de l'email.";
             loading.value = false;
          }

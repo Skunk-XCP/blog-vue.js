@@ -128,30 +128,48 @@ export const deletePost = async (postId) => {
 };
 
 export const addComment = async ({ content, postId, userId }) => {
-   console.log("Tentative d'ajout d'un commentaire :", {
-      content,
-      postId,
-      userId,
-   });
-
    try {
-      const { data, error } = await supabase
+      const { data: insertData, error: insertError } = await supabase
          .from("comments")
          .insert([{ content, post_id: postId, user_id: userId }])
          .select();
 
-      if (error) {
-         console.error("Erreur lors de l'insertion du commentaire :", error);
-         throw error;
+      if (insertError) {
+         console.error(
+            "Erreur lors de l'insertion du commentaire :",
+            insertError
+         );
+         throw insertError;
       }
 
-      console.log("Données insérées :", data);
-
-      if (!data || data.length === 0) {
+      if (!insertData || insertData.length === 0) {
          throw new Error("Aucune donnée retournée après l'insertion.");
       }
 
-      return data[0];
+      const commentId = insertData[0].id;
+
+      const { data: commentData, error: fetchError } = await supabase
+         .from("comments")
+         .select(
+            `
+            id,
+            content,
+            created_at,
+            user: user_id (auth_id, firstname, lastname)
+         `
+         )
+         .eq("id", commentId)
+         .single();
+
+      if (fetchError) {
+         console.error(
+            "Erreur lors de la récupération du commentaire :",
+            fetchError
+         );
+         throw fetchError;
+      }
+
+      return commentData;
    } catch (error) {
       console.error("Erreur lors de l'ajout du commentaire :", error);
       throw error;
