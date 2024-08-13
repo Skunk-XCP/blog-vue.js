@@ -33,31 +33,32 @@
 
 <script>
 import { supabase } from "@/supabase";
-import { onMounted, ref } from "vue";
+import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
 export default {
-   setup() {
+   props: {
+      isLoggedIn: Boolean,
+   },
+   setup(props) {
       const router = useRouter();
-      const isLoggedIn = ref(false);
+      const localIsLoggedIn = ref(props.isLoggedIn);
 
-      const checkUser = async () => {
-         const {
-            data: { user },
-         } = await supabase.auth.getUser();
-         isLoggedIn.value = user !== null;
-      };
+      watch(
+         () => props.isLoggedIn,
+         (newValue) => {
+            localIsLoggedIn.value = newValue;
+         }
+      );
 
       const handleLogout = async () => {
          await supabase.auth.signOut();
-         isLoggedIn.value = false;
+         localIsLoggedIn.value = false;
          router.push("/login");
       };
 
-      onMounted(checkUser);
-
       return {
-         isLoggedIn,
+         localIsLoggedIn,
          handleLogout,
       };
    },

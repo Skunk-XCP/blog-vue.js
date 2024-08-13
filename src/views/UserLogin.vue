@@ -22,10 +22,21 @@
                class="border p-2 w-full"
             />
          </div>
-         <button type="submit" class="bg-blue-500 text-white p-2 rounded">
-            Login
-         </button>
+         <div class="flex justify-between">
+            <button type="submit" class="bg-blue-500 text-white p-2 rounded">
+               Login
+            </button>
+            <div class="mt-4">
+               <router-link
+                  to="/reset-password"
+                  class="text-blue-500 hover:underline"
+               >
+                  Mot de passe oublié ?
+               </router-link>
+            </div>
+         </div>
       </form>
+
       <div v-if="error" class="mt-4 p-2 bg-red-200 text-red-800 rounded">
          {{ error }}
       </div>

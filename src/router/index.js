@@ -1,6 +1,8 @@
+import ConfigUserNewPassword from "@/views/ConfigUserNewPassword.vue";
 import CreatePost from "@/views/CreatePost.vue";
 import EmailConfirmation from "@/views/EmailConfirmation.vue";
 import PreviewPost from "@/views/PreviewPost.vue";
+import ResetUserPassword from "@/views/ResetUserPassword.vue";
 import UserDashboard from "@/views/UserDashboard.vue";
 import UserLogin from "@/views/UserLogin.vue";
 import UserSignin from "@/views/UserSignin.vue";
@@ -19,6 +21,12 @@ const routes = [
    { path: "/create", component: CreatePost },
    { path: "/preview/:id", component: PreviewPost },
    { path: "/confirm-email", component: EmailConfirmation },
+   { path: "/reset-password", component: ResetUserPassword },
+   {
+      path: "/config-new-password",
+      component: ConfigUserNewPassword,
+      name: "ConfigNewPassword",
+   },
 ];
 
 const router = createRouter({
