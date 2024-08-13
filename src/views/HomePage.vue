@@ -1,10 +1,19 @@
 <template>
-   <div class="p-10 ml-20">
-      <div v-if="posts.length === 0">
-         <p>Chargement des articles...</p>
+   <div class="mx-20">
+      <div class="flex justify-center p-10">
+         <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Rechercher des articles..."
+            class="border p-2 w-72 mb-6"
+         />
       </div>
+      <div v-if="filteredPosts.length === 0">
+         <p>Aucun article ne correspond à votre recherche.</p>
+      </div>
+
       <div v-else>
-         <div v-for="post in posts" :key="post.id" class="mb-20">
+         <div v-for="post in filteredPosts" :key="post.id" class="mb-20">
             <h2 class="text-3xl">
                <strong>{{ post.title }}</strong>
             </h2>
@@ -36,12 +45,13 @@
 
 <script>
 import { fetchPosts } from "@/api/postService";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 
 export default {
    setup() {
       const posts = ref([]);
       const loading = ref(true);
+      const searchQuery = ref("");
 
       const getPosts = async () => {
          try {
@@ -53,6 +63,17 @@ export default {
             );
          }
       };
+
+      const filteredPosts = computed(() => {
+         if (searchQuery.value.length < 3) {
+            return posts.value;
+         }
+         return posts.value.filter((post) => {
+            return post.title
+               .toLowerCase()
+               .includes(searchQuery.value.toLowerCase());
+         });
+      });
 
       const formatExcerpt = (content) => {
          const maxLength = 150;
@@ -88,6 +109,8 @@ export default {
 
       return {
          posts,
+         searchQuery,
+         filteredPosts,
          loading,
          formatDate,
          formatTime,

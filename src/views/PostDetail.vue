@@ -1,5 +1,5 @@
 <template>
-   <div class="p-10 ml-20" v-if="post">
+   <div class="p-10 mx-20" v-if="post">
       <h1 class="text-3xl font-bold mb-4">{{ post.title }}</h1>
       <div class="flex gap-4">
          <p>
