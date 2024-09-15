@@ -4,9 +4,7 @@
       <div class="flex gap-4">
          <p>
             <strong>Auteur: </strong>
-            <span v-if="post.user"
-               >{{ post.user.firstname }} {{ post.user.lastname }}</span
-            >
+            <span v-if="post.user">{{ post.user.username }}</span>
             <span v-else> Inconnu </span>
          </p>
          <p>
@@ -51,6 +49,7 @@ export default {
             const { data } = await supabase.auth.getUser();
             user.value = data.user;
             post.value = await fetchPostById(route.params.id);
+            console.log("Post data:", post.value);
          } catch (error) {
             console.error(
                "Erreur lors de la récupération de l'article :",

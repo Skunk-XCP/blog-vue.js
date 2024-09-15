@@ -6,8 +6,8 @@ export const fetchPosts = async () => {
       .select(
          `
      *,
-     user: user_id (auth_id, firstname, lastname),
-     comments (id, content, user: user_id (firstname, lastname))
+     user: user_id (auth_id, username),
+     comments (id, content, user: user_id (username))
    `
       )
       .order("created_at", { ascending: false });
@@ -26,7 +26,7 @@ export const fetchPostsByUserId = async (userId) => {
       .select(
          `
        *,
-       comments (id, content, user: user_id (firstname, lastname))
+       comments (id, content, user: user_id (username))
      `
       )
       .eq("user_id", userId);
@@ -47,15 +47,15 @@ export const fetchPostById = async (id) => {
       .from("posts")
       .select(
          `
-       *,
-       user: user_id (auth_id, firstname, lastname),
-       comments (
-         id,
-         content,
-         created_at,
-         user: user_id (auth_id, firstname, lastname)
-       )
-     `
+         *,
+         user: user_id (auth_id, username),
+         comments (
+            id,
+            content,
+            created_at,
+            user: user_id (auth_id, username)
+         )
+      `
       )
       .eq("id", id)
       .order("created_at", { ascending: true })
@@ -69,6 +69,7 @@ export const fetchPostById = async (id) => {
       throw error;
    }
 
+   console.log("Data fetched by fetchPostById:", data); // Log des données
    return data;
 };
 
@@ -155,7 +156,7 @@ export const addComment = async ({ content, postId, userId }) => {
             id,
             content,
             created_at,
-            user: user_id (auth_id, firstname, lastname)
+            user: user_id (auth_id, username)
          `
          )
          .eq("id", commentId)

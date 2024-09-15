@@ -1,78 +1,55 @@
 <template>
-   <div class="p-10 max-w-3xl mx-auto">
-      <h1 class="text-3xl font-bold mb-6">Confirmation de l'Email</h1>
-      <p v-if="loading">Vérification en cours...</p>
-      <p v-else-if="error" class="text-red-500">{{ error }}</p>
-      <p v-else class="text-green-500">
-         Votre email a été confirmé avec succès!
-      </p>
-   </div>
+  <div class="p-10 max-w-3xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6">Confirmation de l'Email</h1>
+    <p v-if="loading">Vérification en cours...</p>
+    <p v-else-if="error" class="text-red-500">{{ error }}</p>
+    <p v-else class="text-green-500">Votre email a été confirmé avec succès!</p>
+  </div>
 </template>
 
 <script>
 import { supabase } from "@/supabase";
 import { onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 
 export default {
-   setup() {
-      const loading = ref(true);
-      const error = ref(null);
+  setup() {
+    const loading = ref(true);
+    const error = ref(null);
+    const route = useRoute();
 
-      const handleEmailConfirmation = async () => {
-         try {
-            const { data: session, error: getSessionError } =
-               await supabase.auth.getSession();
-            if (getSessionError || !session) {
-               error.value =
-                  "Erreur lors de la récupération de la session utilisateur.";
-               loading.value = false;
-               return;
-            }
+    const handleEmailConfirmation = async () => {
+      try {
+        const token = route.query.access_token;
+        const type = route.query.type;
 
-            const user = session.user;
+        if (type === "signup" && token) {
+          const { error: confirmError } = await supabase.auth.verifyOTP({
+            token,
+            type: "signup",
+          });
 
-            const { data, error: profileError } = await supabase
-               .from("users")
-               .select("*")
-               .eq("auth_id", user.id)
-               .single();
+          if (confirmError) {
+            error.value = `Erreur lors de la confirmation de l'email: ${confirmError.message}`;
+          }
+        } else {
+          error.value = "Lien de confirmation invalide.";
+        }
+      } catch (err) {
+        error.value = "Erreur lors de la confirmation de l'email.";
+      } finally {
+        loading.value = false;
+      }
+    };
 
-            if (profileError) {
-               const { error: insertError } = await supabase
-                  .from("users")
-                  .insert([
-                     {
-                        auth_id: user.id,
-                        first_name: user.user_metadata.first_name,
-                        last_name: user.user_metadata.last_name,
-                     },
-                  ]);
+    onMounted(() => {
+      handleEmailConfirmation();
+    });
 
-               if (insertError) {
-                  error.value =
-                     "Erreur lors de la création du profil utilisateur.";
-               } else {
-                  console.log("User profile created successfully.");
-               }
-            } else {
-               console.log("User profile found:", data);
-            }
-
-            loading.value = false;
-         } catch (err) {
-            error.value = "Erreur lors de la confirmation de l'email.";
-            loading.value = false;
-         }
-      };
-
-      onMounted(() => {
-         handleEmailConfirmation();
-      });
-
-      return {
-         loading,
-         error,
-      };
-   },
+    return {
+      loading,
+      error,
+    };
+  },
 };
 </script>

@@ -21,7 +21,7 @@
                <p>
                   <strong>Auteur: </strong>
                   <span v-if="post.user">
-                     {{ post.user.firstname }} {{ post.user.lastname }}
+                     {{ post.user.username }}
                   </span>
                   <span v-else> Inconnu </span>
                </p>

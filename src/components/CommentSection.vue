@@ -41,8 +41,7 @@
                      <p>
                         <strong>Auteur: </strong>
                         <span v-if="comment.user">
-                           {{ comment.user.firstname }}
-                           {{ comment.user.lastname }}
+                           {{ comment.user.username }}
                         </span>
                         <span v-else> Inconnu </span>
                      </p>
