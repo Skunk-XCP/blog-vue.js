@@ -80,7 +80,7 @@
         <button
           type="button"
           @click="showPopup = true"
-          class="bg-gray-300 text-black p-2 rounded"
+          class="border-gray-300 bg-gray-100 border-4 text-gray-300 font-bold p-2 rounded w-12 h-12"
         >
           +
         </button>
@@ -91,7 +91,7 @@
         v-if="showPopup"
         class="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center"
       >
-        <div class="bg-white p-4 rounded shadow-lg space-y-4">
+        <div class="bg-white p-4 rounded shadow-lg space-x-4 space-y-4">
           <h2>Ajouter un élément</h2>
           <button
             @click="addTextBlock"
@@ -107,7 +107,7 @@
           </button>
           <button
             @click="showPopup = false"
-            class="bg-gray-500 text-white p-2 rounded"
+            class="bg-red-500 text-white p-2 rounded"
           >
             Fermer
           </button>

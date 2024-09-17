@@ -4,7 +4,7 @@
     <div v-if="post">
       <h2 class="text-2xl font-bold mb-4">{{ post.title }}</h2>
       <!-- Utilise v-html pour afficher le contenu avec des balises HTML -->
-      <div class="mb-4" v-html="post.content"></div>
+      <div class="post-content mb-4" v-html="post.content"></div>
       <button
         @click="editPost(post.id)"
         class="bg-blue-500 text-white px-4 py-2 rounded"
@@ -53,3 +53,26 @@ export default {
   },
 };
 </script>
+
+<style>
+/* Ajoute un style spécifique pour les images dans le contenu de l'article */
+.post-content img {
+  max-width: 20%;
+  height: auto;
+  margin: 30px 0; /* Ajoute de la marge autour des images */
+  border-radius: 8px; /* Optionnel : Ajoute un léger arrondi aux images */
+  display: block;
+  margin-left: auto;
+  margin-right: auto; /* Centre les images horizontalement */
+}
+
+/* Ajuste la taille maximale des images */
+.post-content p {
+  max-width: 100%;
+  line-height: 1.8;
+}
+
+.post-content p {
+  margin-bottom: 1rem; /* Ajoute un espacement entre les paragraphes */
+}
+</style>
