@@ -35,7 +35,6 @@ export default {
         post.value = await fetchPostById(route.params.id);
       } catch (err) {
         error.value = "Erreur lors de la récupération de l'article.";
-        console.error("Erreur lors de la récupération de l'article :", err);
       }
     };
 
@@ -59,11 +58,11 @@ export default {
 .post-content img {
   max-width: 20%;
   height: auto;
-  margin: 30px 0; /* Ajoute de la marge autour des images */
-  border-radius: 8px; /* Optionnel : Ajoute un léger arrondi aux images */
+  margin: 30px 0;
+  border-radius: 8px;
   display: block;
   margin-left: auto;
-  margin-right: auto; /* Centre les images horizontalement */
+  margin-right: auto;
 }
 
 /* Ajuste la taille maximale des images */
@@ -73,6 +72,6 @@ export default {
 }
 
 .post-content p {
-  margin-bottom: 1rem; /* Ajoute un espacement entre les paragraphes */
+  margin-bottom: 1rem;
 }
 </style>

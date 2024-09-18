@@ -36,12 +36,12 @@
             </div>
 
             <!-- Image -->
-            <div v-else-if="element.type === 'image'" class="block relative">
+            <div v-else-if="element.type === 'image'" class="flex flex-col">
               <input
                 type="text"
                 v-model="element.url"
                 placeholder="URL de l'image"
-                class="border p-2 w-full mb-2"
+                class="border p-2 w-1/4 mb-2"
                 @mouseover="hoveredImage = element.url"
                 @mouseleave="hoveredImage = ''"
               />
@@ -49,12 +49,12 @@
                 type="file"
                 @change="handleFileUpload($event, index)"
                 accept="image/*"
-                class="border p-2 w-full"
+                class="border p-2 w-1/4"
               />
               <button
                 @click="removeBlock(index)"
                 type="button"
-                class="bg-red-500 text-white p-2 rounded mt-2"
+                class="bg-red-500 text-white w-1/4 p-2 rounded mt-2"
               >
                 Supprimer l'image
               </button>
@@ -63,6 +63,7 @@
               <div
                 v-if="hoveredImage === element.url"
                 class="absolute mt-2 p-1 border bg-white shadow-lg z-10"
+                style="right: 45%"
               >
                 <img
                   :src="element.url"
