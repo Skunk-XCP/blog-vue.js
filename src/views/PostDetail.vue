@@ -57,16 +57,13 @@ export default {
 
     const sanitizedContent = computed(() => {
       if (!post.value) return "";
+
+      // Regrouper les images consécutives dans un div flex-container
       return DOMPurify.sanitize(
-        post.value.content
-          .split("\n\n")
-          .map((paragraph) =>
-            paragraph
-              .split("\n")
-              .map((line) => (line.trim() ? `<p>${line}</p>` : "<br>"))
-              .join("")
-          )
-          .join("<br>")
+        post.value.content.replace(
+          /(<img[^>]*>)(\s*<img[^>]*>)+/g,
+          (match) => `<div class="flex-container">${match}</div>`
+        )
       );
     });
 
@@ -94,24 +91,24 @@ export default {
 </script>
 
 <style>
-/* Ajoute un style spécifique pour les images dans le contenu de l'article */
+/* Conteneur flex pour les groupes d'images */
+.flex-container {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+}
+
+.flex-container img {
+  max-width: 20%;
+  height: auto;
+  margin: 0;
+}
+
+/* Styles spécifiques aux images dans le contenu de l'article */
 .post-content img {
   max-width: 20%;
   height: auto;
-  margin: 30px 0;
-  border-radius: 8px;
+  margin: 10px 0;
   display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* Ajuste la taille maximale des images */
-.post-content p {
-  max-width: 100%;
-  line-height: 1.8;
-}
-
-.post-content p {
-  margin-bottom: 1rem;
 }
 </style>
