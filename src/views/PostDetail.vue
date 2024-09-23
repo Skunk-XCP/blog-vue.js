@@ -108,7 +108,6 @@ export default {
 .post-content img {
   max-width: 20%;
   height: auto;
-  margin: 10px 0;
   display: block;
 }
 </style>
