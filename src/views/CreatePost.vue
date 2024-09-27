@@ -96,19 +96,19 @@
           <h2>Ajouter un élément</h2>
           <button
             @click="addTextBlock"
-            class="bg-blue-500 text-white p-2 rounded"
+            class="text-black p-2 rounded font-semibold underline"
           >
             Ajouter du texte
           </button>
           <button
             @click="addImageBlock"
-            class="bg-green-500 text-white p-2 rounded"
+            class="text-black p-2 rounded font-semibold underline"
           >
             Ajouter une image
           </button>
           <button
             @click="showPopup = false"
-            class="bg-red-500 text-white p-2 rounded"
+            class="text-red-500 p-2 rounded font-semibold underline"
           >
             Fermer
           </button>
